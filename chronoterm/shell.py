@@ -24,6 +24,7 @@ except ImportError:
     from clock_ascii import clock_ascii_1
 
 from datetime import datetime
+import winsound
 
 app = typer.Typer(help="ChronoTerm — Type 'shell' for interactive mode or use commands directly.")
 console = Console()
@@ -81,6 +82,7 @@ def time():
     hour, minutes = datetime.now().strftime("%H:%M").split(":")
     clock_ascii = clock_ascii_1(hour, minutes)
 
+    winsound.Beep(1000, 1000)
     console.print(clock_ascii)
 
 @app.command()

@@ -3,6 +3,9 @@ import pyjokes
 
 import typer
 
+from playsound import playsound
+import random
+
 app = typer.Typer(help="Joke REPL: Type 'cow', 'trex', or 'exit'.")
 
 # Individual Commands
@@ -10,11 +13,24 @@ app = typer.Typer(help="Joke REPL: Type 'cow', 'trex', or 'exit'.")
 @app.command()
 def joke():
     joke = pyjokes.get_joke()
+    
+    # Play sound, and show joke
+    playsound(r'chronoterm/sounds/faaah-sound.mp3')
     return cowsay.cow(joke)
+    
+    
+
+# Use an absolute path for reliability (e.g., 'C:\\Users\\YourUser\\Music\\song.mp3')
+# Place an 'r' before the string to handle backslashes correctly in Windows paths
+
+    playsound(audio_file_path)
 
 @app.command()
 def joke_trex():
     joke = pyjokes.get_joke()
+
+    
+    playsound(r'chronoterm/sounds/bruh-sound.mp3')
     return cowsay.trex(joke)
 
 # # Interactive Shell

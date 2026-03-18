@@ -1,5 +1,5 @@
 def clock_ascii_1(hour, minutes):
-    template = """
+    template1 = """
      ___
     |---|
     |_|_|
@@ -28,7 +28,7 @@ def clock_ascii_1(hour, minutes):
     |___|
 
         """
-    clock_ascii = template.replace("HH", f"{hour}")
+    clock_ascii = template1.replace("HH", f"{hour}")
     clock_ascii = clock_ascii.replace("MM", f"{minutes}")
 
     return clock_ascii
