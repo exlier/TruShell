@@ -9,10 +9,7 @@ from chronoterm.state import StateStore
 COMMANDS = [
     "joke",
     "addtask",
-    "deletetask",
-    "updatetask",
-    "completetask",
-    "showtasks",
+    "tasks",
     "now",
     "time",
     "world",

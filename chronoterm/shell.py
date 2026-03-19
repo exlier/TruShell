@@ -24,6 +24,7 @@ except ImportError:
     from clock_ascii import clock_ascii
 
 from datetime import datetime
+import pytz
 import winsound
 
 app = typer.Typer(help="ChronoTerm — Type 'shell' for interactive mode or use commands directly.")
@@ -110,7 +111,12 @@ def tz(
     elif action == "add" and name:
         try:
             chrono.tz.add(name)
-            console.print(f"[green]Added:[/green] {name}")
+
+            timezone_obj = pytz.timezone(name)
+            aware_datetime = datetime.now(timezone_obj).strftime("%H:%M")
+
+            console.print(f"[green]Added:[/green] {name} [{aware_datetime}]")
+            
         except Exception as e:
             console.print(f"[bold red]Error:[/bold red] {e}")
     elif action == "remove" and name:
