@@ -18,7 +18,7 @@ def clock_ascii(clock_text, template_type):
            |HH:MM|
            |_____|
            |.....|
-           \ ___ /
+           \\ ___ /
             |   |
             |   |
             |   |

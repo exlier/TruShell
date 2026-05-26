@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -46,7 +46,7 @@ def _safe_zoneinfo(name: str) -> ZoneInfo:
 class TimezoneManager:
     store: StateStore
     state: AppState
-    lock: threading.Lock | None = None
+    lock: threading.Lock = field(default_factory=threading.Lock)
 
     def list(self) -> list[str]:
         return list(self.state.timezones)

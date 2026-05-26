@@ -1,216 +1,100 @@
-# AtOffice-Shell
+# AtOffice Shell
 
-AtOffice-Shell is a small Python terminal project that combines three tools in one workspace:
+AtOffice Shell is a polished open-source Python CLI that combines jokes, todos, alarms, world clocks, and a productivity-focused terminal shell.
 
-- `PyFunny` for joke output with ASCII characters and sound effects
-- `TodoCLI` for a simple SQLite-backed task manager
-- `ChronoTerm` for time, timezone, alarm, and stopwatch commands
+![AtOffice Shell banner](docs/screenshot-placeholder.png)
 
-The `AtOffice shell` brings these tools together into one REPL so you can run commands from a single prompt.
+## Key Features
 
-## Features
+- Unified CLI: `atoffice-shell` starts a single interactive shell for jokes, todos, and ChronoTerm.
+- Todo manager: add, update, complete, and list tasks with an SQLite-backed store.
+- ChronoTerm utilities: current time, world clock, timezones, alarms, and stopwatch.
+- Configurable settings: change clock style, time template, joke character, and sound.
+- Platform-safe storage: app data and state are stored in user-specific directories.
+- UV-first install: `uv tool install git+https://github.com/AkshajSinghal/at-office-shell`
 
-### 1. AtOffice REPL
+## Installation
 
-The main combined shell is launched from `project.py`. Inside it, you can:
-
-- tell jokes
-- manage todos
-- use ChronoTerm commands
-- open the interactive settings menu
-
-Prompt:
-
-```text
-atoffice-shell:
-```
-
-### 2. PyFunny
-
-PyFunny uses `pyjokes`, `cowsay`, and sound effects.
-
-Available commands:
-
-- `joke`
-- `joke_trex`
-
-The `joke` command can be customized from the settings menu:
-
-- joke character
-- joke sound
-
-### 3. TodoCLI
-
-TodoCLI stores tasks in `todos.db`.
-
-Available commands:
-
-- `addtask "Task name" "Category"`
-- `deletetask 1`
-- `updatetask 1 "New task" "New category"`
-- `completetask 1`
-- `showtasks`
-
-### 4. ChronoTerm
-
-ChronoTerm can run on its own or through the AtOffice shell.
-
-Available commands:
-
-- `now`
-- `time`
-- `world`
-- `tz list`
-- `tz add Asia/Kolkata`
-- `tz remove Asia/Kolkata`
-- `alarm list`
-- `alarm add "07:30" --label Wakeup`
-- `alarm remove <alarm_id>`
-- `sw show`
-- `sw start`
-- `sw pause`
-- `sw lap`
-- `sw reset`
-
-ChronoTerm settings currently support:
-
-- time template selection
-- 12-hour / 24-hour clock format
-
-## How To Run
-
-### Option 1: Run the combined AtOffice shell
-
-From the project root:
+### Install with uv
 
 ```bash
-python project.py
+uv tool install git+https://github.com/AkshajSinghal/at-office-shell
 ```
 
-This starts the shared shell where all supported commands can be used.
-
-### Option 2: Run the ChronoTerm shell directly
-
-From the project root:
+### Install with pip
 
 ```bash
-python chronoterm_project.py
+python -m pip install git+https://github.com/AkshajSinghal/at-office-shell
 ```
 
-This starts the dedicated ChronoTerm shell.
+## Quick Start
 
-
-## Settings Menu
-
-Inside the AtOffice shell, type:
-
-```text
-settings
+```bash
+atoffice-shell
 ```
 
-This opens the arrow-key settings menu.
-
-Current editable settings:
-
-- `joke`
-  - character
-  - sound
-- `time`
-  - template
-  - clock format
-- `world`
-  - clock format
-
-Settings are saved to a JSON state file through ChronoTerm state storage, so choices persist between runs.
-
-## Project Structure
-
-### Root files
-
-- [project.py](project.py)
-  Combined AtOffice REPL
-- [chronoterm_project.py](chronoterm_project.py)
-  Root entry point for ChronoTerm shell
-- [pyfunny.py](pyfunny.py)
-  Joke commands
-- [todocli.py](todocli.py)
-  Todo commands
-- [database.py](database.py)
-  SQLite operations for todos
-- [model.py](model.py)
-  Todo model
-- [settings.py](settings.py)
-  Arrow-key settings menu
-- [todos.db](todos.db)
-  SQLite database file
-
-### ChronoTerm package
-
-- [chronoterm/shell.py](chronoterm/shell.py)
-  Main ChronoTerm commands and REPL
-- [chronoterm/timezones.py](chronoterm/timezones.py)
-  Timezone formatting and world time tables
-- [chronoterm/alarms.py](chronoterm/alarms.py)
-  Alarm management
-- [chronoterm/stopwatch.py](chronoterm/stopwatch.py)
-  Stopwatch logic
-- [chronoterm/state.py](chronoterm/state.py)
-  Persistent JSON-backed settings/state
-- [chronoterm/clock_ascii.py](chronoterm/clock_ascii.py)
-  ASCII clock templates
-- [chronoterm/sound.py](chronoterm/sound.py)
-  Alarm sound helper
-- [chronoterm/sounds](chronoterm/sounds)
-  Audio files used by jokes and alarms
-
-## Dependencies
-
-Based on the current code, the project uses these main Python packages:
-
-- `typer`
-- `rich`
-- `pyjokes`
-- `cowsay`
-- `playsound`
-- `pytz`
-
-It also uses standard-library modules such as:
-
-- `sqlite3`
-- `json`
-- `datetime`
-- `pathlib`
-- `zoneinfo`
-
-## Example Commands
-
-Inside `atoffice-shell`:
+Inside the app, try:
 
 ```text
 joke
 showtasks
-addtask "Finish README" "Programming"
+addtask "Review PR" "Work"
 time
 world
-tz add Europe/Dublin
 settings
 ```
 
-Inside `chronoterm>`:
+## CLI Commands
 
-```text
-now
-time
-world
-tz list
-alarm list
-sw start
-sw show
+- `atoffice-shell` — start the interactive shell
+- `atoffice-shell version` — show the installed version
+- `atoffice-shell joke` — tell a joke with ASCII art
+- `atoffice-shell joke-trex` — tell a T-Rex joke
+- `atoffice-shell addtask <task> <category>` — add a todo
+- `atoffice-shell deletetask <position>` — delete a todo
+- `atoffice-shell updatetask <position> [task] [category]` — update a todo
+- `atoffice-shell completetask <position>` — mark a todo done
+- `atoffice-shell showtasks` — list all todos
+- `atoffice-shell settings` — configure clock and joke preferences
+- `atoffice-shell now` — show the current local time
+- `atoffice-shell time` — show ASCII clock output
+- `atoffice-shell world` — show favorite world timezones
+- `atoffice-shell tz list|add|remove` — manage saved zones
+- `atoffice-shell alarm list|add|remove` — manage alarms
+- `atoffice-shell sw show|start|pause|lap|reset` — control stopwatch
+
+## Example Usage
+
+```bash
+atoffice-shell addtask "Finish README" "Documentation"
+atoffice-shell showtasks
+atoffice-shell tz add Europe/London
+atoffice-shell alarm add "07:30" --label "Morning"
 ```
 
-## Notes
+## Architecture Overview
 
-- The project is currently Windows-friendly in a few places, especially the settings menu and sound behavior.
-- Some commands depend on audio playback support.
-- Todo data is stored locally in SQLite.
-- ChronoTerm settings are stored in a JSON file managed by `StateStore`.
+The package is organized into a single installable Python package:
+
+- `atoffice_shell/cli.py` — CLI entrypoint and command routing
+- `atoffice_shell/project.py` — interactive shell logic
+- `atoffice_shell/pyfunny.py` — joke commands and sound handling
+- `atoffice_shell/todocli.py` — todo command implementations
+- `atoffice_shell/database.py` — SQLite storage in the user data directory
+- `atoffice_shell/settings.py` — platform-safe settings manager
+- `atoffice_shell/chronoterm/` — time, timezone, alarm, and stopwatch features
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
+## Roadmap
+
+- Add more sound and joke options
+- Improve shell prompts and command history
+- Add serialization tests for state and data storage
+- Expand support for cross-platform audio playback
+
+## License
+
+Apache 2.0. See [LICENSE](LICENSE) for details.

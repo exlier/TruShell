@@ -1,23 +1,18 @@
-from pyfunny import joke, joke_trex
-from todocli import addtask, deletetask, updatetask, completetask, showtask
-from settings import launch_settings
+from __future__ import annotations
 
-from chronoterm.shell import app as chronoterm_app
-
-import typer
 import re
 import shlex
+import typer
 
-# COPY PASTED TO CS50.dev
-
-app = typer.Typer(help="Joke REPL: Type 'cow', 'trex', or 'exit'.")
-
+from .pyfunny import joke, joke_trex
+from .settings import launch_settings
+from .todocli import addtask, delete_todo, update_todo, complete_todo, showtask
+from .chronoterm.shell import app as chronoterm_app
 
 HELP_TEXT = (
-    "Available commands: joke, joke_trex, \n"
-    " addtask, deletetask, updatetask, completetask, showtask, \n"
-    "now, time, world, tz, alarm, sw, \n"
-    "settings, exit, help"
+    "Available commands: joke, joke_trex, "
+    "addtask, deletetask, updatetask, completetask, showtask, "
+    "now, time, world, tz, alarm, sw, settings, exit, help"
 )
 
 
@@ -28,19 +23,19 @@ def _prompt_command() -> tuple[str, str]:
 
 
 def _handle_joke_command(command: str) -> bool:
-    if command == "joke":
-        print(joke())
-        return True
-    if command == "joke_trex":
-        print(joke_trex())
+    if command in {"joke", "joke_trex", "joke-trex"}:
+        if command == "joke":
+            typer.echo(joke())
+        else:
+            typer.echo(joke_trex())
         return True
     return False
 
 
 def _handle_todo_command(command: str) -> bool:
-    delete_match = re.match(r"deletetask\s(\d+)", command)
+    delete_match = re.match(r"deletetask\s+(\d+)", command)
     if delete_match:
-        deletetask(int(delete_match.group(1)))
+        delete_todo(int(delete_match.group(1)))
         return True
 
     add_match = re.match(r'addtask\s+"([^"]+)"\s+"([^"]+)"', command)
@@ -50,12 +45,12 @@ def _handle_todo_command(command: str) -> bool:
 
     update_match = re.match(r'updatetask\s+(\d+)\s+"([^"]+)"\s+"([^"]+)"', command)
     if update_match:
-        updatetask(int(update_match.group(1)), update_match.group(2), update_match.group(3))
+        update_todo(int(update_match.group(1)), update_match.group(2), update_match.group(3))
         return True
 
     complete_match = re.match(r'completetask\s+(\d+)', command)
     if complete_match:
-        completetask(int(complete_match.group(1)))
+        complete_todo(int(complete_match.group(1)))
         return True
 
     if command == "showtasks":
@@ -66,7 +61,7 @@ def _handle_todo_command(command: str) -> bool:
 
 
 def _handle_local_command(command: str) -> str:
-    if command in ["exit", "quit"]:
+    if command in {"exit", "quit"}:
         return "exit"
     if _handle_joke_command(command):
         return "handled"
@@ -76,7 +71,7 @@ def _handle_local_command(command: str) -> str:
         launch_settings()
         return "handled"
     if command == "help":
-        print(HELP_TEXT)
+        typer.echo(HELP_TEXT)
         return "handled"
     return "unhandled"
 
@@ -88,20 +83,19 @@ def _handle_chronoterm_command(raw_command: str, normalized_command: str) -> boo
     try:
         chronoterm_app(shlex.split(raw_command))
     except SystemExit:
-        # Typer exits after each command, keep the at-office shell running.
         pass
     return True
 
 
-# Interactive Shell
-@app.command()
-def atoffice():
-    """Starts an interactive shell for jokes."""
-    typer.secho("Entering AtOffice REPL. Type 'exit' to quit.", fg=typer.colors.CYAN)
-    
-    # The Loop
+def run_interactive_shell() -> None:
+    typer.secho("Entering AtOffice Shell. Type 'exit' to quit.", fg=typer.colors.CYAN)
+
     while True:
-        raw_command, command = _prompt_command()
+        try:
+            raw_command, command = _prompt_command()
+        except (KeyboardInterrupt, EOFError):
+            typer.echo("")
+            break
 
         local_result = _handle_local_command(command)
         if local_result == "exit":
@@ -111,9 +105,4 @@ def atoffice():
         if _handle_chronoterm_command(raw_command, command):
             continue
 
-        if local_result == "unhandled":
-            typer.secho(f"Unknown command: {command}", fg=typer.colors.RED)
-
-
-if __name__ == "__main__":
-    app()
+        typer.secho(f"Unknown command: {command}", fg=typer.colors.RED)

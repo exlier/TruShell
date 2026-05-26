@@ -1,26 +1,64 @@
 [project]
 name = "at-office-shell"
 version = "0.1.0"
-description = "A productivity terminal shell with jokes, todos, and ChronoTerm"
+description = "A polished productivity CLI shell with jokes, todos, and ChronoTerm features."
 readme = "README.md"
 requires-python = ">=3.10"
-
+license = { text = "Apache-2.0" }
 authors = [
-    { name = "Akshaj Singhal" }
+  { name = "Akshaj Singhal" }
+]
+keywords = ["cli", "productivity", "typer", "todo", "alarm", "timezone", "chronoterm"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Utilities",
 ]
 
 dependencies = [
-    "typer",
-    "rich",
-    "pyjokes",
-    "cowsay",
-    "playsound",
-    "pytz"
+  "typer>=0.9.0",
+  "rich>=13.0.0",
+  "pyjokes>=0.6.0",
+  "cowsay>=4.0",
+  "playsound==1.2.2",
+  "pytz>=2024.1",
+  "platformdirs>=3.0.0",
 ]
 
+[project.urls]
+Home = "https://github.com/AkshajSinghal/at-office-shell"
+Repository = "https://github.com/AkshajSinghal/at-office-shell"
+Documentation = "https://github.com/AkshajSinghal/at-office-shell#readme"
+"Bug Tracker" = "https://github.com/AkshajSinghal/at-office-shell/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "ruff>=0.0.280", "black>=24.10.0"]
+
 [project.scripts]
-atoffice-shell = "project:main"
+atoffice-shell = "atoffice_shell.cli:app"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.22.0"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["atoffice_shell"]
+include = ["README.md", "LICENSE", "atoffice_shell/chronoterm/sounds/*"]
+
+[tool.ruff]
+line-length = 88
+target-version = ["py310"]
+select = ["E", "F", "W", "C90", "B", "Q"]
+
+[tool.black]
+line-length = 88
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+testpaths = ["tests"]

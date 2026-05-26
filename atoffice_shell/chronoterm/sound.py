@@ -2,17 +2,15 @@ from __future__ import annotations
 
 import sys
 
-#CS50.DEV
 
 def play_alarm() -> None:
     try:
-        # Windows sound
         if sys.platform.startswith("win"):
             import winsound
-            winsound.Beep(1200, 600)
-            winsound.Beep(900, 600)
+
+            winsound.Beep(1200, 400)
+            winsound.Beep(900, 400)
         else:
-            # Terminal bell fallback
-            print("\a")
+            print("", end="")
     except Exception:
-        print("\a")
+        print("", end="")
