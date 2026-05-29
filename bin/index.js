@@ -1,12 +1,29 @@
 #!/usr/bin/env node
-const { spawn } = require('child_process');
+
+const { execFileSync, spawn } = require('child_process');
 const path = require('path');
 
+// Try python3 first, fallback to python
+const pythonCmd = (() => {
+  try {
+    execFileSync('python3', ['--version'], { stdio: 'ignore' });
+    return 'python3';
+  } catch {
+    return 'python';
+  }
+})();
+
+// Check if Python is available and functional
+const result = execFileSync(pythonCmd, ['--version'], { encoding: 'utf8', stdio: 'pipe' });
+if (!result) {
+  console.error('TruShell requires Python 3.10+. Please install Python first.');
+  process.exit(1);
+}
+
 const args = process.argv.slice(2);
-const python = process.platform === 'win32' ? 'python' : 'python3';
 const packageRoot = path.resolve(__dirname, '..');
 
-const child = spawn(python, ['-m', 'trushell', ...args], {
+const child = spawn(pythonCmd, ['-m', 'trushell', ...args], {
   stdio: 'inherit',
   cwd: packageRoot,
 });

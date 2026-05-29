@@ -8,12 +8,13 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "pip install typer rich pyjokes cowsay pytz platformdirs textual || pip3 install typer rich pyjokes cowsay pytz platformdirs textual"
   },
   "bin": {
-    "truos": "./bin/index.js",
-    "trushell": "./bin/index.js",
-    "atoffice-shell": "./bin/index.js",
+    "truos": "./index.js",
+    "trushell": "./index.js",
+    "atoffice-shell": "./index.js",
     "TruOS": "./bin/index.js"
   },
   "files": [
