@@ -33,7 +33,7 @@ def _split_command(user_input: str) -> tuple[str, str]:
 
 
 def _prompt_command() -> tuple[str, str, str]:
-    raw_command = typer.prompt("atoffice-shell").strip()
+    raw_command = input("trushell ❯ ").strip()
     command, argument = _split_command(raw_command)
     return raw_command, command, argument
 
