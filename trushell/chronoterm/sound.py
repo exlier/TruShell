@@ -1,8 +1,64 @@
 from __future__ import annotations
-import os
-import sys
+
 import shutil
 import subprocess
+import sys
+from pathlib import Path
+
+
+def _run_quietly(cmd: list[str]) -> bool:
+    result = subprocess.run(
+        cmd,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def _resolve_windows_sound_path(path: Path) -> Path | None:
+    if path.suffix.lower() == ".wav":
+        return path
+
+    wav_path = path.with_suffix(".wav")
+    if wav_path.exists():
+        return wav_path
+
+    return None
+
+
+def play_audio_file(path: str | Path) -> None:
+    """Play a specific audio asset when a platform player is available."""
+    sound_path = Path(path)
+
+    if sys.platform.startswith("win"):
+        playable_path = _resolve_windows_sound_path(sound_path)
+        if playable_path is None:
+            raise RuntimeError(f"Windows playback requires a .wav fallback for {sound_path.name}")
+
+        import winsound
+
+        winsound.PlaySound(str(playable_path), winsound.SND_FILENAME)
+        return
+
+    if sys.platform == "darwin":
+        if not shutil.which("afplay"):
+            raise RuntimeError("afplay is unavailable")
+        if _run_quietly(["afplay", str(sound_path)]):
+            return
+        raise RuntimeError(f"afplay failed for {sound_path}")
+
+    for player in (
+        ["paplay", str(sound_path)],
+        ["aplay", str(sound_path)],
+        ["ffplay", "-nodisp", "-autoexit", str(sound_path)],
+        ["mpg123", "-q", str(sound_path)],
+        ["mpg321", "-q", str(sound_path)],
+    ):
+        if shutil.which(player[0]) and _run_quietly(player):
+            return
+
+    raise RuntimeError(f"No supported Linux audio player could play {sound_path}")
 
 
 def play_alarm() -> None:
@@ -14,12 +70,7 @@ def play_alarm() -> None:
             winsound.Beep(900, 400)
         
         elif sys.platform == "darwin":
-            subprocess.run(
-                ["afplay", "/System/Library/Sounds/Glass.aiff"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=False,
-            )
+            _run_quietly(["afplay", "/System/Library/Sounds/Glass.aiff"])
         
         else:  # Linux/Unix
             for cmd in [
@@ -28,13 +79,7 @@ def play_alarm() -> None:
                 ["canberra-gtk-play", "--id=alarm-clock-elapsed"],
             ]:
                 if shutil.which(cmd[0]):
-                    result = subprocess.run(
-                        cmd,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
-                        check=False,
-                    )
-                    if result.returncode == 0:
+                    if _run_quietly(cmd):
                         return
             
             sys.stdout.write("\007" * 3)
