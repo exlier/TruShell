@@ -123,15 +123,15 @@ class TruShellEditor(App):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield TextArea(self.file_content, id="editor_text_area")
+        yield TextArea.code_editor(self.file_content, id="editor")
         yield Footer()
 
     def on_mount(self) -> None:
-        text_area = self.query_one("#editor_text_area", TextArea)
+        text_area = self.query_one("#editor", TextArea)
         text_area.focus()
 
     def action_save_file(self) -> None:
-        text_area = self.query_one("#editor_text_area", TextArea)
+        text_area = self.query_one("#editor", TextArea)
         try:
             with open(self.file_path, "w", encoding="utf-8") as handle:
                 handle.write(text_area.text)
