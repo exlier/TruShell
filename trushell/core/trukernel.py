@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shlex
 import subprocess
 import sys
 import threading
@@ -244,16 +245,23 @@ class TruKernel:
         """Try to run an unregistered command via the host OS shell.
 
         Special-cases 'cd' because it must change the Python process CWD.
+        Blocks shell metacharacters for security.
         """
         full_cmd = f"{command} {args}".strip()
 
         if command == "cd":
             return self._handle_cd(args)
 
+        # Block dangerous shell metacharacters
+        if "|" in full_cmd or ">" in full_cmd or "<" in full_cmd:
+            print("Error: pipes and redirects are not allowed")
+            self.logger.warning("Blocked shell metacharacter in command: %s", full_cmd)
+            return False
+
         try:
             result = subprocess.run(
-                full_cmd,
-                shell=True,
+                shlex.split(full_cmd),
+                shell=False,
                 capture_output=True,
                 text=True,
             )
