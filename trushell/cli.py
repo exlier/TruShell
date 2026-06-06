@@ -270,7 +270,7 @@ def _handle_cd_command(raw_command: str) -> bool:
 
     try:
         os.chdir(target)
-        _run_external_command("ls", shell=True, check=False, cwd=os.getcwd())
+        typer.echo(os.getcwd())
     except (FileNotFoundError, NotADirectoryError, PermissionError) as error:
         typer.secho(f"❌ Cannot navigate: {error}", fg=typer.colors.RED)
     except OSError as error:

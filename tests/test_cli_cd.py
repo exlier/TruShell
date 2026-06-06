@@ -1,0 +1,27 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from trushell import cli
+
+
+def test_handle_cd_command_changes_directory(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    target = tmp_path / "dir"
+    target.mkdir()
+
+    called = False
+
+    def fake_run_external_command(command: str, shell: bool = True, check: bool = False, cwd: str | None = None):
+        nonlocal called
+        called = True
+        return None
+
+    monkeypatch.setattr(cli, "_run_external_command", fake_run_external_command)
+
+    result = cli._handle_cd_command("cd dir")
+
+    assert result is True
+    assert Path.cwd() == target
+    assert not called
+    assert str(target) in capsys.readouterr().out

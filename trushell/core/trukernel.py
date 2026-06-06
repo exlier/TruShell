@@ -49,9 +49,16 @@ class TruKernel:
         plugins = parse_manifest(
             self._manifest_path("plugins.md"), source="plugin"
         )
-        aliases = parse_manifest(
-            self._manifest_path("my_command_config.md"), source="alias"
-        )
+
+        alias_path = self._manifest_path("my_command_config.md")
+        if alias_path.exists():
+            aliases = parse_manifest(alias_path, source="alias")
+        else:
+            self.logger.debug(
+                "Alias manifest not found, skipping optional manifest: %s",
+                alias_path,
+            )
+            aliases = []
 
         for entry in builtins:
             self._register(entry)
