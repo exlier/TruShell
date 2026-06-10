@@ -270,6 +270,7 @@ def _handle_chronoterm_command(raw_command: str, normalized_command: str) -> boo
         return False
 
 
+# TODO: Deprecate this CLI cd stub in favor of kernel dispatch to avoid duplicate path handling logic.
 def _handle_cd_command(raw_command: str) -> bool:
     command, argument = _split_command(raw_command)
     if command != "cd":
@@ -279,7 +280,7 @@ def _handle_cd_command(raw_command: str) -> bool:
         typer.secho("Syntax: cd <directory_path>", fg=typer.colors.YELLOW)
         return True
 
-    target = os.path.expanduser(argument)
+    target = os.path.expandvars(os.path.expanduser(argument.strip()))
 
     try:
         os.chdir(target)
