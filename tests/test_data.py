@@ -68,3 +68,51 @@ def test_run_csv_view_short_rows_are_padded(tmp_path: Path) -> None:
     assert "3" in output
     # There should be at least one empty/padded cell visible in output
     assert "  " in output
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX temp paths are used for this regression test")
+def test_run_csv_view_handles_unquoted_paths_with_spaces(tmp_path: Path) -> None:
+    from trushell.commands.data import run_csv_view
+
+    directory = tmp_path / "Program Files"
+    directory.mkdir()
+    file_path = directory / "users.csv"
+    file_path.write_text("ID,Name\n1,Ada\n", encoding="utf-8")
+
+    output = _strip_ansi(run_csv_view(str(file_path)))
+
+    assert "ID" in output
+    assert "Name" in output
+    assert "Ada" in output
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows path parsing regression")
+def test_run_csv_view_handles_unquoted_windows_paths(tmp_path: Path) -> None:
+    from trushell.commands.data import run_csv_view
+
+    file_path = tmp_path / "users.csv"
+    rows = ["ID,Name"] + [f"{i},User {i}" for i in range(1, 52)]
+    file_path.write_text("\n".join(rows), encoding="utf-8")
+
+    output = _strip_ansi(run_csv_view(str(file_path)))
+
+    assert "User 50" in output
+    assert "User 51" not in output
+    assert "...and 1 more" in output
+    assert "rows" in output
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows path with spaces regression")
+def test_run_csv_view_handles_windows_paths_with_spaces(tmp_path: Path) -> None:
+    from trushell.commands.data import run_csv_view
+
+    directory = tmp_path / "Program Files"
+    directory.mkdir()
+    file_path = directory / "users.csv"
+    file_path.write_text("ID,Name\n1,Ada\n", encoding="utf-8")
+
+    output = _strip_ansi(run_csv_view(str(file_path)))
+
+    assert "ID" in output
+    assert "Name" in output
+    assert "Ada" in output
