@@ -1,7 +1,8 @@
 mod parser;
 
+use std::fs::OpenOptions;
 use std::io::{self, Write};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, ExitStatus, Stdio};
 
 fn main() {
     println!("Welcome to TruShell Native Engine");
