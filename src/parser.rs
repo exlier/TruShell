@@ -566,6 +566,13 @@ impl Parser {
     fn parse_factor(&mut self) -> Result<ASTNode> {
         let mut node = self.parse_primary()?;
 
+        match node {
+            ASTNode::Identifier(_) | ASTNode::Command { .. } => {
+                node = self.parse_command_chain(node)?;
+            }
+            _ => {}
+        }
+
         while let Some(op) = self.peek_factor_operator() {
             self.next();
             let right = self.parse_primary()?;
@@ -789,14 +796,45 @@ impl Parser {
     }
 
     fn parse_redirect_target(&mut self) -> Result<RedirectTarget> {
-        match self.next().cloned() {
-            Some(Token::Word(text)) => Ok(RedirectTarget::File(text)),
-            Some(Token::Identifier(text)) => Ok(RedirectTarget::File(text)),
-            Some(Token::StringLiteral(text)) => Ok(RedirectTarget::File(text)),
-            Some(Token::Number(text)) => Ok(RedirectTarget::File(text)),
-            Some(other) => Err(ParseError::new(format!("Expected redirect target, found {:?}", other))),
-            None => Err(ParseError::new("Expected redirect target, found end of input")),
+        if let Some(Token::StringLiteral(text)) = self.peek() {
+            let text = text.clone();
+            self.next();
+            return Ok(RedirectTarget::File(text));
         }
+
+        let mut path = String::new();
+        let mut consumed_any = false;
+
+        while let Some(token) = self.peek().cloned() {
+            match token {
+                Token::Identifier(text) | Token::Word(text) | Token::Number(text) => {
+                    path.push_str(&text);
+                    self.next();
+                    consumed_any = true;
+                }
+                Token::Dot => {
+                    path.push('.');
+                    self.next();
+                    consumed_any = true;
+                }
+                Token::Slash => {
+                    path.push('/');
+                    self.next();
+                    consumed_any = true;
+                }
+                Token::Flag(text) if consumed_any => {
+                    path.push_str(&text);
+                    self.next();
+                }
+                _ => break,
+            }
+        }
+
+        if !consumed_any {
+            return Err(ParseError::new("Expected redirect target, found end of input"));
+        }
+
+        Ok(RedirectTarget::File(path))
     }
 }
 
@@ -830,5 +868,34 @@ mod tests {
         let ast = parse_line("ls() | filter { $it.size > 1mb }").unwrap();
 
         assert!(matches!(ast, ASTNode::Pipeline { .. }));
+    }
+
+    #[test]
+    fn parse_command_with_output_redirect() {
+        let ast = parse_line("echo hello > out.txt").unwrap();
+
+        assert_eq!(
+            ast,
+            ASTNode::Redirect {
+                source: Box::new(ASTNode::Command {
+                    name: "echo".into(),
+                    args: vec![ASTNode::Literal(Literal::String("hello".into()))],
+                }),
+                fd: 1,
+                mode: RedirectMode::Truncate,
+                target: RedirectTarget::File("out.txt".into()),
+                merge_stderr: false,
+            }
+        );
+    }
+
+    #[test]
+    fn parse_pipeline_with_redirected_stage() {
+        let ast = parse_line("echo hello | cat > out.txt").unwrap();
+
+        assert!(matches!(ast, ASTNode::Pipeline { ref stages } if stages.len() == 2));
+        if let ASTNode::Pipeline { stages } = ast {
+            assert!(matches!(*stages[1], ASTNode::Redirect { .. }));
+        }
     }
 }

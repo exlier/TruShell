@@ -364,4 +364,17 @@ mod tests {
         assert_eq!(contents, "hello\n");
         remove_file(&path).ok();
     }
+
+    #[test]
+    fn execute_parsed_command_redirect() {
+        let path = unique_temp_file("parsed_redirect");
+        let ast = parser::parse_line(&format!("echo parsed > {}", path.to_string_lossy())).unwrap();
+
+        let status = execute_ast(&ast).expect("parsed redirect command failed");
+        assert!(status.success());
+
+        let contents = read_to_string(&path).expect("failed to read parsed output file");
+        assert_eq!(contents, "parsed\n");
+        remove_file(&path).ok();
+    }
 }
