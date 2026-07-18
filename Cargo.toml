@@ -6,3 +6,7 @@ authors = ["TruFoundation <noreply@trufoundation.org>"]
 
 [dependencies]
 crossterm = "0.27"
+signal-hook = "0.3"
+nix = "0.27"
+once_cell = "1.20"
+libc = "0.2"

@@ -1,10 +1,13 @@
 mod parser;
+mod job_control;
 
 use std::io::{self, Write};
-use std::process::{Command, Stdio};
 
 fn main() {
     println!("Welcome to TruShell Native Engine");
+
+    // Initialize job control and signal handlers
+    job_control::init_signal_handlers();
 
     loop {
         print!("trushell ❯ ");
@@ -51,15 +54,15 @@ fn main() {
                 // If the parsed AST looks like a CLI invocation that was
                 // accidentally parsed as subtraction (e.g. `ls -la` -> `ls - la`),
                 // fall back to executing the system command.
-                if let Some((cmd, args)) = probable_cli_from_ast(&ast) {
-                    execute_system_command(&cmd, &args);
+                    if let Some((cmd, args)) = probable_cli_from_ast(&ast) {
+                    job_control::spawn_and_wait(&cmd, &args);
                 } else {
                     println!("Parsed AST: {:#?}", ast);
                 }
             }
             Err(err) => {
                 eprintln!("Parse error: {}", err);
-                execute_system_command_from_input(trimmed_input);
+                job_control::spawn_and_wait(&parts[0], &parts[1..].to_vec());
             }
         }
     }
@@ -173,23 +176,8 @@ fn execute_system_command(cmd: &str, args: &[String]) {
         cmd
     };
 
-    let child = Command::new(command_name)
-        .args(args)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn();
-
-    match child {
-        Ok(mut child_proc) => {
-            if let Err(e) = child_proc.wait() {
-                eprintln!("Execution error: {}", e);
-            }
-        }
-        Err(e) => {
-            eprintln!("trushell: command not found '{}': {}", command_name, e);
-        }
-    }
+    // Deprecated: routed to job_control::spawn_and_wait in main
+    job_control::spawn_and_wait(command_name, args);
 }
 
 fn execute_system_command_from_input(input: &str) {
@@ -200,5 +188,5 @@ fn execute_system_command_from_input(input: &str) {
 
     let cmd = parts[0].clone();
     let args = parts.into_iter().skip(1).collect::<Vec<_>>();
-    execute_system_command(&cmd, &args);
+    job_control::spawn_and_wait(&cmd, &args);
 }
