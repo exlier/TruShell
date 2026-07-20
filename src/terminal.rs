@@ -114,8 +114,6 @@ impl TerminalBuffer {
                 *cell = ' ';
             }
         });
-        self.cursor_row = 0;
-        self.cursor_col = 0;
     }
 
     fn clear_to_end(&mut self) {
@@ -216,19 +214,19 @@ impl Perform for TerminalBuffer {
                 self.cursor_col = col.min(self.width.saturating_sub(1));
             }
             'A' => {
-                let amount = params.first().copied().unwrap_or(1) as usize;
+                let amount = params.first().copied().unwrap_or(1).max(1) as usize;
                 self.cursor_row = self.cursor_row.saturating_sub(amount);
             }
             'B' => {
-                let amount = params.first().copied().unwrap_or(1) as usize;
+                let amount = params.first().copied().unwrap_or(1).max(1) as usize;
                 self.cursor_row = (self.cursor_row + amount).min(self.height.saturating_sub(1));
             }
             'C' => {
-                let amount = params.first().copied().unwrap_or(1) as usize;
+                let amount = params.first().copied().unwrap_or(1).max(1) as usize;
                 self.cursor_col = (self.cursor_col + amount).min(self.width.saturating_sub(1));
             }
             'D' => {
-                let amount = params.first().copied().unwrap_or(1) as usize;
+                let amount = params.first().copied().unwrap_or(1).max(1) as usize;
                 self.cursor_col = self.cursor_col.saturating_sub(amount);
             }
             'm' => self.handle_sgr(&params),
